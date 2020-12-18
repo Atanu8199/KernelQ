@@ -640,7 +640,7 @@ static ssize_t acc_read(struct file *fp, char __user *buf,
 	 * Then compansite the difference of rounding up to
 	 * integer multiple of maxpacket size.
 	 */
-	data_length = count;
+        data_length = count;
 	data_length += dev->ep_out->maxpacket - 1;
 	data_length -= data_length % dev->ep_out->maxpacket;
 

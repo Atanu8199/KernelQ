@@ -9,7 +9,7 @@
 #
 # Normal rules (sorted alphabetically)
 #
-.*
+.vscode/
 *.a
 *.bin
 *.bz2
@@ -127,4 +127,3 @@ kernel/configs/android-*.cfg
 
 kernel.log
 out/
-build.sh

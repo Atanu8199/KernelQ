@@ -93,8 +93,6 @@ config ANDROID_DEFAULT_SETTING
 	select IPV6_VTI
 	select L2TP
 	select MAGIC_SYSRQ
-	select MEMCG
-	select MEMCG_SWAP
 	select MODULES
 	select MODULE_UNLOAD
 	select MODVERSIONS

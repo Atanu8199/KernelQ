@@ -856,7 +856,7 @@ config DEBUG_BLK_CGROUP
 
 config CGROUP_WRITEBACK
 	bool
-	depends on MEMCG && BLK_CGROUP
+	depends on BLK_CGROUP
 	default y
 
 menuconfig CGROUP_SCHED

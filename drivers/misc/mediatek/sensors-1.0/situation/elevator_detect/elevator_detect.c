@@ -83,7 +83,6 @@ static int elevator_detect_recv_data(struct data_unit_t *event, void *reserved)
 
 	if (event->flush_action == DATA_ACTION)
 		value[0] = event->elevator_data_t.status;
-
 	err = elevator_data_report_t(value, (int64_t)event->time_stamp);
 	return err;
 }

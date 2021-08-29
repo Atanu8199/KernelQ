@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DATE=$(date +"%Y%m%d-%H%M")
+START=$(date +"%s")
 
 make_build(){
 	print "Make kernel dtb..." green
@@ -25,34 +26,38 @@ send_msg(){
 }
 
 send_file(){
+	END=$(date +"%s")
+	DIFF=$(($END - $START))
+    if [ $TOOLCHAIN == clang ]; then
+        COMPILER_TYPE=$(clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+    else
+        COMPILER_TYPE="GCC"
+    fi
+	LINUX_VERSION=$(make kernelversion)
 	print "Sending file..." green
-	SECONDS=$SECONDS
-	let "hours=SECONDS/3600"
-	let "minutes=(SECONDS%3600)/60"
-	let "seconds=(SECONDS%3600)%60"
-	if (( $SECONDS > 3600 )) ; then
-	   curl -F chat_id="${chat_id}" \
-		-F caption="✅ Time: $hours h $minutes min $seconds second ✅ Last commit: $(git log --pretty=format:'%s' -5)" \
-		-F document=@"${1}" \
-		 https://api.telegram.org/bot"${bot_token}"/sendDocument 
-	elif (( $SECONDS > 60 )) ; then
-	   curl -F chat_id="${chat_id}" \
-		-F caption="✅ Time: $minutes min $seconds seconds ✅ Last commit: $(git log --pretty=format:'%s' -5)" \
-		-F document=@"${1}" \
-		 https://api.telegram.org/bot"${bot_token}"/sendDocument
-	else
-	   curl -F chat_id="${chat_id}" \
-		-F caption="✅ Time: $seconds seconds ✅ Last commit: $(git log --pretty=format:'%s' -5)" \
-		-F document=@"${1}" \
-		 https://api.telegram.org/bot"${bot_token}"/sendDocument
-	fi
+	curl -F chat_id="${chat_id}" \
+	-F caption="Time: $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). " \
+	-F document=@"${1}" \
+	https://api.telegram.org/bot"${bot_token}"/sendDocument
+
+LAST_COMMIT=$(git log --pretty=format:'%s' -5)
+CPU=$(nproc --all)
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+MYGRP="-1001453427722"
+
+	curl -s -X POST "https://api.telegram.org/bot$bot_token/sendMessage" \
+	-d chat_id="$MYGRP" \
+	-d "disable_web_page_preview=true" \
+	-d "parse_mode=html" \
+	-d text="<b>• Device Begonia •</b>%0ALast commit: <code>$LAST_COMMIT</code><b>%0ALinux Version</b>: <code>$LINUX_VERSION</code>%0ABranch: <code>$BRANCH</code>%0ACompiled with: <code>$COMPILER_TYPE</code>%0ACore used: <code>$CPU</code>"
+
 }
 
 mkzip(){
 	print "Generate zip file..." green
 
-	if [ -f $(pwd)/out/arch/arm64/boot/Image.gz-dtb ]; then
-		cp $(pwd)/out/arch/arm64/boot/Image.gz-dtb  anykernel/
+	if [ -f "out/arch/arm64/boot/Image.gz-dtb" ]; then
+		cp out/arch/arm64/boot/Image.gz-dtb  anykernel/
 		cd anykernel
 		zip -r9 ../$1 * -x .git README.md *placeholder
 		cd ..

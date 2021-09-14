@@ -1549,7 +1549,7 @@ static bool mtk_is_charger_on(struct charger_manager *info)
 			info->cable_out_cnt = 0;
 			mutex_unlock(&info->cable_out_lock);
 		}
-		if (charger_online && reboot_flag) {
+		if (charger_online && reboot_force) {
 			charger_manager_notifier(info,
 					CHARGER_NOTIFY_NORMAL);
 			if (pinfo->usb_psy)
@@ -1557,7 +1557,7 @@ static bool mtk_is_charger_on(struct charger_manager *info)
 			else
 				chr_err("%s: usb psy err.\n", __func__);
 
-			reboot_flag = false;
+			reboot_force = false;
 			chr_err("%s: check plugin early.\n", __func__);
 		}
 	} else {

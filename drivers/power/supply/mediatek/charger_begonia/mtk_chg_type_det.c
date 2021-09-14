@@ -225,7 +225,7 @@ static int mt_usb_get_property(struct power_supply *psy,
 			(mtk_chg->chg_type == CHARGING_HOST)) && !input_suspend)
 			val->intval = 1;
 		else if (mt_charger_plugin() && !input_suspend &&
-				reboot_flag && (mtk_chg->chg_type == CHARGER_UNKNOWN))
+				reboot_force && (mtk_chg->chg_type == CHARGER_UNKNOWN))
 			val->intval = 1;
 		else
 			val->intval = 0;
@@ -240,7 +240,7 @@ static int mt_usb_get_property(struct power_supply *psy,
 		val->intval = POWER_SUPPLY_TYPE_UNKNOWN;
 		break;
 	case POWER_SUPPLY_PROP_REAL_TYPE:
-		if (mt_charger_plugin() && reboot_flag &&
+		if (mt_charger_plugin() && reboot_force &&
 				(mtk_chg->chg_type == CHARGER_UNKNOWN)) {
 			val->intval = POWER_SUPPLY_TYPE_USB;
 			mtk_chg->usb_desc.type = POWER_SUPPLY_TYPE_USB;

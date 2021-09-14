@@ -561,8 +561,6 @@ extern bool pmic_is_battery_exist(void);
 extern void notify_adapter_event(enum adapter_type type, enum adapter_event evt,
 	void *val);
 
-static bool reboot_flag = true;
-
 /* FIXME */
 enum usb_state_enum {
 	USB_SUSPEND = 0,

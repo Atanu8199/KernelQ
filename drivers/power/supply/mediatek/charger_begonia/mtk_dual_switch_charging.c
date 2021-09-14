@@ -1208,7 +1208,7 @@ int dual_charger_dev_event(struct notifier_block *nb, unsigned long event,
 	power_supply_get_property(swchgalg->charger_psy,
 			POWER_SUPPLY_PROP_ONLINE, &val);
 	charger_online = val.intval;
-	pr_info("%s: chg_online=%d.\n", charger_online);
+	pr_info("%s: chg_online=%d.\n", __func__, charger_online);
 
 	switch (event) {
 	case CHARGER_DEV_NOTIFY_RECHG:

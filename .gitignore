@@ -38,8 +38,15 @@
 *.symtypes
 *.tar
 *.xz
+*.zip
 Module.symvers
 modules.builtin
+
+# Out files
+out/
+
+# Log
+build.log
 
 #
 # Top-level generic files

@@ -49,7 +49,6 @@
 #include <linux/moduleparam.h>
 #include <linux/uaccess.h>
 #include <linux/nmi.h>
-#include <linux/cpumask.h>
 #include <linux/kvm_para.h>
 
 #include "workqueue_internal.h"

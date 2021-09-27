@@ -619,25 +619,18 @@ static void fnhe_flush_routes(struct fib_nh_exception *fnhe)
 	}
 }
 
-static void fnhe_remove_oldest(struct fnhe_hash_bucket *hash)
+static struct fib_nh_exception *fnhe_oldest(struct fnhe_hash_bucket *hash)
 {
-	struct fib_nh_exception __rcu **fnhe_p, **oldest_p;
-	struct fib_nh_exception *fnhe, *oldest = NULL;
+	struct fib_nh_exception *fnhe, *oldest;
 
-	for (fnhe_p = &hash->chain; ; fnhe_p = &fnhe->fnhe_next) {
-		fnhe = rcu_dereference_protected(*fnhe_p,
-						 lockdep_is_held(&fnhe_lock));
-		if (!fnhe)
-			break;
-		if (!oldest ||
-		    time_before(fnhe->fnhe_stamp, oldest->fnhe_stamp)) {
+	oldest = rcu_dereference(hash->chain);
+	for (fnhe = rcu_dereference(oldest->fnhe_next); fnhe;
+	     fnhe = rcu_dereference(fnhe->fnhe_next)) {
+		if (time_before(fnhe->fnhe_stamp, oldest->fnhe_stamp))
 			oldest = fnhe;
-			oldest_p = fnhe_p;
-		}
 	}
 	fnhe_flush_routes(oldest);
-	*oldest_p = oldest->fnhe_next;
-	kfree_rcu(oldest, rcu);
+	return oldest;
 }
 
 static inline u32 fnhe_hashfun(__be32 daddr)
@@ -714,29 +707,22 @@ static void update_or_create_fnhe(struct fib_nh *nh, __be32 daddr, __be32 gw,
 		if (rt)
 			fill_route_from_fnhe(rt, fnhe);
 	} else {
-		/* Randomize max depth to avoid some side channels attacks. */
-		int max_depth = FNHE_RECLAIM_DEPTH +
-				prandom_u32_max(FNHE_RECLAIM_DEPTH);
+		if (depth > FNHE_RECLAIM_DEPTH)
+			fnhe = fnhe_oldest(hash);
+		else {
+			fnhe = kzalloc(sizeof(*fnhe), GFP_ATOMIC);
+			if (!fnhe)
+				goto out_unlock;
 
-		while (depth > max_depth) {
-			fnhe_remove_oldest(hash);
-			depth--;
+			fnhe->fnhe_next = hash->chain;
+			rcu_assign_pointer(hash->chain, fnhe);
 		}
-
-		fnhe = kzalloc(sizeof(*fnhe), GFP_ATOMIC);
-		if (!fnhe)
-			goto out_unlock;
-
-		fnhe->fnhe_next = hash->chain;
-
 		fnhe->fnhe_genid = genid;
 		fnhe->fnhe_daddr = daddr;
 		fnhe->fnhe_gw = gw;
 		fnhe->fnhe_pmtu = pmtu;
 		fnhe->fnhe_mtu_locked = lock;
 		fnhe->fnhe_expires = max(1UL, expires);
-
-		rcu_assign_pointer(hash->chain, fnhe);
 
 		/* Exception created; mark the cached routes for the nexthop
 		 * stale, so anyone caching it rechecks if this exception
@@ -1458,24 +1444,6 @@ static bool rt_bind_exception(struct rtable *rt, struct fib_nh_exception *fnhe,
 	return ret;
 }
 
-struct uncached_list {
-	spinlock_t		lock;
-	struct list_head	head;
-};
-
-static DEFINE_PER_CPU_ALIGNED(struct uncached_list, rt_uncached_list);
-
-static void rt_add_uncached_list(struct rtable *rt)
-{
-	struct uncached_list *ul = raw_cpu_ptr(&rt_uncached_list);
-
-	rt->rt_uncached_list = ul;
-
-	spin_lock_bh(&ul->lock);
-	list_add_tail(&rt->rt_uncached, &ul->head);
-	spin_unlock_bh(&ul->lock);
-}
-
 static bool rt_cache_route(struct fib_nh *nh, struct rtable *rt)
 {
 	struct rtable *orig, *prev, **p;
@@ -1495,7 +1463,7 @@ static bool rt_cache_route(struct fib_nh *nh, struct rtable *rt)
 	prev = cmpxchg(p, orig, rt);
 	if (prev == orig) {
 		if (orig) {
-			rt_add_uncached_list(orig);
+			dst_dev_put(&orig->dst);
 			dst_release(&orig->dst);
 		}
 	} else {
@@ -1506,7 +1474,25 @@ static bool rt_cache_route(struct fib_nh *nh, struct rtable *rt)
 	return ret;
 }
 
-static void ipv4_dst_destroy(struct dst_entry *dst)
+struct uncached_list {
+	spinlock_t		lock;
+	struct list_head	head;
+};
+
+static DEFINE_PER_CPU_ALIGNED(struct uncached_list, rt_uncached_list);
+
+void rt_add_uncached_list(struct rtable *rt)
+{
+	struct uncached_list *ul = raw_cpu_ptr(&rt_uncached_list);
+
+	rt->rt_uncached_list = ul;
+
+	spin_lock_bh(&ul->lock);
+	list_add_tail(&rt->rt_uncached, &ul->head);
+	spin_unlock_bh(&ul->lock);
+}
+
+void rt_del_uncached_list(struct rtable *rt)
 {
 	if (!list_empty(&rt->rt_uncached)) {
 		struct uncached_list *ul = rt->rt_uncached_list;

@@ -9,18 +9,8 @@ gcc_Path=$MainPath/../gcc
 Clang_Path=$MainPath/../clang
 DTC_Path=$MainPath/../DragonTC
 LOG=$MainPath/error.log
-USER="TeraaBytee"
+USER="Imperfect"
 HOST="GengKapak"
-
-# Upload to Telegram. 1 is YES | 0 is NO(default)
-TG=0
-
-if [ $TG = 1 ];then
-    # Bot token
-    token=""
-    # Set Telegram Chat ID
-    chat_id=""
-fi
 
 # Message
 CAP1="
@@ -35,23 +25,6 @@ Build Success in : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)
 CAP2="
 Build Fail in : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)
 "
-
-Upload() {
-    if [ -e $MainPath/${Compiler}*.zip ];then
-        ZIP=$(echo ${Compiler}*.zip)
-        curl -F document=@$ZIP "https://api.telegram.org/bot$token/sendDocument" \
-        -F chat_id="$chat_id" \
-        -F "disable_web_page_preview=true" \
-        -F "parse_mode=html" \
-        -F caption="$CAP1"
-    else
-        curl -F document=@$LOG "https://api.telegram.org/bot$token/sendDocument" \
-        -F chat_id="$chat_id" \
-        -F "disable_web_page_preview=true" \
-        -F "parse_mode=html" \
-        -F caption="$CAP2"
-    fi
-}
 
 # Make zip
 MakeZip() {
@@ -69,7 +42,7 @@ MakeZip() {
     cp -af $MainPath/out/arch/arm64/boot/Image.gz-dtb $Any
     cp -af anykernel-real.sh anykernel.sh
     sed -i "s/kernel.string=.*/kernel.string=$KERNEL_NAME-$HeadCommit by ${USER}/g" anykernel.sh
-    zip -r $MainPath/"${Compiler}_Q-OSS_$ZIP_KERNEL_VERSION-$KERNEL_NAME-$TIME.zip" * -x .git .git/**\* ./.git ./anykernel-real.sh ./.gitignore ./LICENSE ./README.md ./*.zip
+    zip -r $MainPath/"[${Compiler}][Q-OSS][$ZIP_KERNEL_VERSION]-$KERNEL_NAME-$TIME.zip" * -x .git .git/**\* ./.git ./anykernel-real.sh ./.gitignore ./LICENSE ./README.md ./*.zip
     cd $MainPath
 }
 
@@ -175,10 +148,6 @@ End() {
 	    BUILD_END=$(date +"%s")
 	    DIFF=$((BUILD_END - BUILD_START))
 	    echo "Build Fail in : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
-    fi
-    if [ $TG = 1 ];then
-	    Upload
-	    rm ${Compiler}*.zip
     fi
 }
 

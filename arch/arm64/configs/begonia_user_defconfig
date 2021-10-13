@@ -1455,10 +1455,6 @@ CONFIG_MTK_CMDQ=y
 CONFIG_MTK_IMGSENSOR=y
 CONFIG_SPECIFY_IMGSENSOR=y
 CONFIG_IMGSENSOR_MAIN="s5kgw1sp_mipi_raw s5kgw1sunny_mipi_raw s5kgw1ofilm_mipi_raw"
-<<<<<<< HEAD
-=======
-CONFIG_IMGSENSOR_SUB="s5k3t2_mipi_raw s5k3t1sunny_mipi_raw s5k3t1ofilm_mipi_raw"
->>>>>>> 457d6a9a249d (defconfig: add s5k3t2_mipi_raw)
 CONFIG_IMGSENSOR_MAIN2="gc5035_mipi_raw gc2375beta_mipi_raw gc2375alpha_mipi_raw ov02a10beta_mipi_raw ov02a10alpha_mipi_raw"
 CONFIG_IMGSENSOR_SUB="s5k3t1sunny_mipi_raw s5k3t1ofilm_mipi_raw"
 CONFIG_IMGSENSOR_SUB2="ov02a10af_mipi_raw gc2375af_mipi_raw"

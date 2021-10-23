@@ -4,6 +4,7 @@
 #
 
 subdir-ccflags-y += -Werror
+subdir-ccflags-y += $(call cc-option,-Wno-array-compare,)
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include
 
 ifdef CONFIG_MTK_ION

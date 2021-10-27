@@ -22,6 +22,7 @@
 *.gz
 *.ko
 *.ll
+*.log
 *.lst
 *.lz4
 *.lzma
@@ -42,11 +43,8 @@
 Module.symvers
 modules.builtin
 
-# Out files
+# out files
 out/
-
-# Log
-build.log
 
 #
 # Top-level generic files

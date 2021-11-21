@@ -1388,7 +1388,7 @@ int eas_ctrl_init(struct proc_dir_entry *parent)
 	perf_sched_big_task_rotation = 0;
 	perf_sched_stune_task_thresh = -1;
 
-	default_schedplus_down_throttle_ns = 1000000;
+	default_schedplus_down_throttle_ns = 90000000;
 	default_schedplus_up_throttle_ns = 500000;
 	default_schedplus_sync_flag = 1;
 	cur_schedplus_down_throttle_ns = -1;

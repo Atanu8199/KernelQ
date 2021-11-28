@@ -43,7 +43,7 @@ enum ION_PROFILE_TYPE {
 void ion_profile_init(void);
 
 #ifndef ION_PROFILE
-#define mmprofile_enable_event(...) 0
+#define mmprofile_enable_event(...)
 #define mmprofile_log_ex(...)
 #define mmprofile_enable(...)
 #define mmprofile_start(...)

@@ -2021,22 +2021,17 @@ int __teei_client_decode_uint32(unsigned long dev_file_id,
 		if (((u32 *)dec->data) == NULL)
 			IMSG_ERROR("dec.data is NULL!\n");
 
-		if (((u32 *)((char *)dec_context->ker_res_data_addr
-					+ dec_context->dec_offset) == NULL))
-			IMSG_ERROR("decode data decode is NULL!\n");
-		else {
-			value1 = *((u32 *)((char *)
-				dec_context->ker_res_data_addr
-				+ dec_context->dec_offset));
+		value1 = *((u32 *)((char *)
+			dec_context->ker_res_data_addr
+			+ dec_context->dec_offset));
 
-			if (kernel_range == 0) {
-				addr = dec->data;
-				result = copy_to_user((void *)addr, &value1, 4);
-				if (result)
-					IMSG_ERROR("failed to copy_to_user!\n");
-			} else
-				*(unsigned int *)dec->data = value1;
-		}
+		if (kernel_range == 0) {
+			addr = dec->data;
+			result = copy_to_user((void *)addr, &value1, 4);
+			if (result)
+				IMSG_ERROR("failed to copy_to_user!\n");
+		} else
+			*(unsigned int *)dec->data = value1;
 
 		dec_context->dec_offset += sizeof(u32);
 		dec_context->dec_res_pos++;

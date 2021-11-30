@@ -336,8 +336,7 @@ static int profile_dead_cpu(unsigned int cpu)
 	struct page *page;
 	int i;
 
-	if (prof_cpu_mask != NULL)
-		cpumask_clear_cpu(cpu, prof_cpu_mask);
+	cpumask_clear_cpu(cpu, prof_cpu_mask);
 
 	for (i = 0; i < 2; i++) {
 		if (per_cpu(cpu_profile_hits, cpu)[i]) {
@@ -373,8 +372,7 @@ static int profile_prepare_cpu(unsigned int cpu)
 
 static int profile_online_cpu(unsigned int cpu)
 {
-	if (prof_cpu_mask != NULL)
-		cpumask_set_cpu(cpu, prof_cpu_mask);
+	cpumask_set_cpu(cpu, prof_cpu_mask);
 
 	return 0;
 }
@@ -403,7 +401,7 @@ void profile_tick(int type)
 {
 	struct pt_regs *regs = get_irq_regs();
 
-	if (!user_mode(regs) && prof_cpu_mask != NULL &&
+	if (!user_mode(regs) &&
 	    cpumask_test_cpu(smp_processor_id(), prof_cpu_mask))
 		profile_hit(type, (void *)profile_pc(regs));
 }

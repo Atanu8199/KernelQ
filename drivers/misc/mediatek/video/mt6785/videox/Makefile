@@ -14,7 +14,6 @@
 # drivers/video/mtk/Makefile
 #
 
-subdir-ccflags-y += $(call cc-option,-Wno-address,)
 obj-$(CONFIG_MTK_FB) += mtkfb_console.o		\
 			disp_assert_layer.o	\
 			mtkfb.o			\
